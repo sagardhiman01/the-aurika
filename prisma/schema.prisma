@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  phone     String?
+  role      String   @default("user")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  addresses Address[]
+  orders    Order[]
+}
+
+model Address {
+  id        Int     @id @default(autoincrement())
+  user      User    @relation(fields: [userId], references: [id])
+  userId    Int
+  name      String?
+  phone     String?
+  street    String?
+  city      String?
+  state     String?
+  pincode   String?
+  isDefault Boolean @default(false)
+}
+
+model Product {
+  id           Int      @id @default(autoincrement())
+  name         String
+  slug         String   @unique
+  description  String
+  price        Float
+  comparePrice Float?
+  category     String
+  material     String   @default("Gold")
+  purity       String   @default("22K")
+  weight       String?
+  images       String?
+  inStock      Boolean  @default(true)
+  featured     Boolean  @default(false)
+  bestSeller   Boolean  @default(false)
+  newArrival   Boolean  @default(false)
+  rating       Float    @default(0)
+  reviewCount  Int      @default(0)
+  sku          String?  @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  orderItems   OrderItem[]
+}
+
+model Order {
+  id                Int         @id @default(autoincrement())
+  user              User        @relation(fields: [userId], references: [id])
+  userId            Int
+  items             OrderItem[]
+  shippingAddress   String?
+  paymentMethod     String      @default("razorpay")
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  razorpaySignature String?
+  paymentStatus     String?
+  subtotal          Float
+  shippingCharge    Float       @default(0)
+  tax               Float       @default(0)
+  totalAmount       Float
+  status            String      @default("pending")
+  trackingId        String?
+  isPaid            Boolean     @default(false)
+  paidAt            DateTime?
+  isDelivered       Boolean     @default(false)
+  deliveredAt       DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   Int
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+  name      String
+  price     Float
+  quantity  Int     @default(1)
+  image     String?
+}
